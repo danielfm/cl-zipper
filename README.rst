@@ -26,7 +26,8 @@ Dependencies:
 Installation
 ------------
 
-To compile and load cl-zipper you need `ASDF`_. First create a link from the repository to the file ``zipper.asd`` and then load the system::
+To compile and load cl-zipper you need `ASDF`_. First create a link from the
+repository to the file ``cl-zipper.asd`` and then load the system::
 
     (asdf:load-system :cl-zipper)
 
@@ -52,7 +53,8 @@ Let's consider the following *s-expression* and its tree representation::
     a   b c   d
 
 
-The ``zipper`` function returns a *loc* that points to the root node of the tree::
+The ``zipper`` function returns a *loc* that points to the root node of the
+tree::
 
     (defparameter *expr-zip* (zipper *expr*))
 
