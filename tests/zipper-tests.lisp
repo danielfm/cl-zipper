@@ -6,14 +6,15 @@
 
 (defun -> (tree &rest path)
   "Navigates the given path on tree, where each element in path is a keyword
-that represents the desired direction."
+that represents the desired direction, i.e., :down, :up, :left, :right."
   (labels ((nav (loc rest)
                 (if rest
                     (nav (case (car rest)
                            (:down (go-down loc))
                            (:up (go-up loc))
                            (:left (go-left loc))
-                           (:right (go-right loc)))
+                           (:right (go-right loc))
+                           (otherwise loc))
                          (cdr rest))
                   loc)))
     (nav (zipper tree) path)))
@@ -68,7 +69,6 @@ that represents the desired direction."
   (is (null (go-left (-> *tree*)))))
 
 (test go-left-at-nil
-
   (is (null (go-left nil))))
 
 (test go-left-at-end
@@ -331,7 +331,7 @@ that represents the desired direction."
     (is (equal 'a (car loc)))
     (is (equal '2 (car new-loc)))
     (is (equal '(*) (lefts new-loc)))
-    (is (equal '() (rights new-loc)))
+    (is (null (rights new-loc)))
     (is (equal '(/ (+ (* 2) (- b 4))) (root-node new-loc)))))
 
 (test remove-node-at-leftmost-node
@@ -339,7 +339,7 @@ that represents the desired direction."
          (new-loc (remove-node loc)))
     (is (equal '* (car loc)))
     (is (equal 'a (car new-loc)))
-    (is (equal '() (lefts new-loc)))
+    (is (null (lefts new-loc)))
     (is (equal '(2) (rights new-loc)))
     (is (equal '(/ (+ (a 2) (- b 4))) (root-node new-loc)))))
 
@@ -349,7 +349,7 @@ that represents the desired direction."
     (is (equal '2 (car loc)))
     (is (equal 'a (car new-loc)))
     (is (equal '(*) (lefts new-loc)))
-    (is (equal '() (rights new-loc)))
+    (is (null (rights new-loc)))
     (is (equal '(/ (+ (* a) (- b 4))) (root-node new-loc)))))
 
 (test remove-node-at-nil
