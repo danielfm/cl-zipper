@@ -100,6 +100,36 @@ the top."
                            (cons loc-tree (node-right loc-path))))
             (node-ppath loc-path)))))
 
+(defun go-next (loc)
+  "Moves to the next loc in the hierarchy, depth-first. When reaching the end,
+returns nil."
+  (with-loc loc
+    (or (and (consp loc-tree) (go-down loc))
+        (go-right loc)
+        (go-next-up loc))))
+
+(defun go-next-up (loc)
+  "Moves up in hierarchy until a right node is found or the root is reached."
+  (let ((uloc (go-up loc)))
+    (when uloc
+      (or (go-right uloc) (go-next-up uloc)))))
+
+(defun go-prev (loc)
+  "Moves to the previous loc in the hierarchy, depth-first. If already at the
+root, returns nil."
+  (let ((lloc (go-left loc)))
+    (if lloc
+        (go-prev-up lloc)
+      (go-up loc))))
+
+(defun go-prev-up (loc)
+  "Moves up in the hierarchy until a left node is found or the root is reached."
+  (with-loc loc
+    (let ((dloc (and (consp loc-tree) (go-down loc))))
+      (if dloc
+          (go-prev-up (rightmost dloc))
+        loc))))
+
 (defun path (loc)
   "Returns the list of nodes leading to this loc."
   (let ((loc-up (go-up loc)))

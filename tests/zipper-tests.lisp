@@ -26,7 +26,7 @@ that represents the desired direction, i.e., :down, :up, :left, :right."
 
 (test zipper
   (let ((loc (-> *tree*)))
-    (is (= 2 (length loc)))
+    (is (equal 2 (length loc)))
     (is (equal *tree* (car loc)))
     (is (null (cadr loc)))))
 
@@ -179,6 +179,79 @@ that represents the desired direction, i.e., :down, :up, :left, :right."
 
 (test rightmost-at-nil
  (is (null (rightmost nil))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; GO-NEXT
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(test go-next
+  (let* ((loc (-> *tree* :down :right :down :right :down))
+         (next-loc (go-next loc)))
+    (is (equal '* (car loc)))
+    (is (equal 'a (car next-loc)))
+    (is (equal '(*) (lefts next-loc)))
+    (is (equal '(2) (rights next-loc)))))
+
+(test go-next-at-root
+  (let* ((loc (-> *tree*))
+         (next-loc (go-next loc)))
+    (is (equal *tree* (car loc)))
+    (is (equal '/ (car next-loc)))
+    (is (equal '() (lefts next-loc)))
+    (is (equal '((+ (* a 2) (- b 4))) (rights next-loc)))))
+
+(test go-next-at-rightmost
+  (let* ((loc (-> *tree* :down :right :down :right :down :right :right))
+         (next-loc (go-next loc)))
+    (is (equal 2 (car loc)))
+    (is (equal '(- b 4) (car next-loc)))
+    (is (equal '((* a 2) +) (lefts next-loc)))
+    (is (equal '() (rights next-loc)))))
+
+(test go-next-at-nested-rightmost
+  (let* ((loc (-> '(+ (- 1 (* 2 3)) 4) :down :right :down :right :right :down :right :right))
+         (next-loc (go-next loc)))
+    (is (equal 3 (car loc)))
+    (is (equal 4 (car next-loc)))
+    (is (equal '((- 1 (* 2 3)) +) (lefts next-loc)))
+    (is (equal '() (rights next-loc)))))
+
+(test go-next-at-last
+  (let* ((loc (-> *tree* :down :right :down :right :right :down :right :right))
+         (next-loc (go-next loc)))
+    (is (equal 4 (car loc)))
+    (is (null next-loc))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;; GO-PREV
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(test go-prev
+  (let* ((loc (-> *tree* :down :right :down :right :down :right))
+         (prev-loc (go-prev loc)))
+    (is (equal 'a (car loc)))
+    (is (equal '* (car prev-loc)))
+    (is (equal '() (lefts prev-loc)))
+    (is (equal '(a 2) (rights prev-loc)))))
+
+(test go-prev-at-root
+  (let* ((loc (-> *tree*))
+         (prev-loc (go-prev loc)))
+    (is (null prev-loc))))
+
+(test go-prev-at-leftmost
+  (let* ((loc (-> *tree* :down :right :down :right :down))
+         (prev-loc (go-prev loc)))
+    (is (equal '* (car loc)))
+    (is (equal '(* a 2) (car prev-loc)))))
+
+(test go-prev-at-rightmost
+  (let* ((loc (-> *tree* :down :right :down :right :right))
+         (prev-loc (go-prev loc)))
+    (is (equal '(- b 4) (car loc)))
+    (is (equal 2 (car prev-loc)))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;

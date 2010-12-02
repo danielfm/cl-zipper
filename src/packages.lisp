@@ -6,6 +6,8 @@
            :edit-node
            :go-down
            :go-left
+           :go-next
+           :go-prev
            :go-right
            :go-up
            :insert-down
