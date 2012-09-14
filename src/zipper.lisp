@@ -3,9 +3,9 @@
 (defstruct loc
   "A location consists of a distinguished tree, the current focus of attention
 and its path, representing its surrounding context."
-  (left "Nodes on the left of this node.")
-  (ppath "Path to this node from the root.")
-  (right "Nodes on the right of this node."))
+  (left "Nodes on the left of this location.")
+  (ppath "Path to this location from the root.")
+  (right "Nodes on the right of this location."))
 
 (defun zipper (lst)
   "Creates a zipper for the list lst."
