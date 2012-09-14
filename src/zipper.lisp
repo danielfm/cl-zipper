@@ -1,6 +1,11 @@
 (in-package :cl-zipper)
 
-(defstruct node left ppath right)
+(defstruct loc
+  "A location consists of a distinguished tree, the current focus of attention
+and its path, representing its surrounding context."
+  (left "Nodes on the left of this node.")
+  (ppath "Path to this node from the root.")
+  (right "Nodes on the right of this node."))
 
 (defun zipper (lst)
   "Creates a zipper for the list lst."
@@ -28,66 +33,66 @@ children."
   (with-loc loc
     (when (consp loc-tree)
       (list (car loc-tree)
-            (make-node :left nil
-                       :ppath loc-path
-                       :right (cdr loc-tree))))))
+            (make-loc :left nil
+                      :ppath loc-path
+                      :right (cdr loc-tree))))))
 
 (defun go-right (loc)
   "Returns the loc of the right sibling of the node at this loc, or nil."
   (with-loc loc
     (when loc-path
-      (let ((left (node-left loc-path))
-            (right (node-right loc-path)))
+      (let ((left (loc-left loc-path))
+            (right (loc-right loc-path)))
         (when right
           (list (car right)
-                (make-node :left (cons loc-tree left)
-                           :ppath (node-ppath loc-path)
-                           :right (cdr right))))))))
+                (make-loc :left (cons loc-tree left)
+                          :ppath (loc-ppath loc-path)
+                          :right (cdr right))))))))
 
 (defun rights (loc)
   "Returns a list of the right siblings of this loc."
   (with-loc loc
     (when loc-path
-      (node-right loc-path))))
+      (loc-right loc-path))))
 
 (defun rightmost (loc)
   "Returns the loc of the rightmost sibling of the node at this loc, or self."
   (with-loc loc
     (if loc-path
-        (let ((right (node-right loc-path)))
+        (let ((right (loc-right loc-path)))
           (list (car (last right))
-                (make-node :left (cons (car (butlast right)) (list loc-tree))
-                           :ppath (node-ppath loc-path)
-                           :right nil)))
+                (make-loc :left (cons (car (butlast right)) (list loc-tree))
+                          :ppath (loc-ppath loc-path)
+                          :right nil)))
       loc)))
 
 (defun go-left (loc)
   "Returns the loc of the left sibling of the node at this loc, or nil."
   (with-loc loc
      (when loc-path
-       (let ((left (node-left loc-path))
-             (right (node-right loc-path)))
+       (let ((left (loc-left loc-path))
+             (right (loc-right loc-path)))
          (when left
            (list (car left)
-                 (make-node :left (cdr left)
-                            :ppath (node-ppath loc-path)
-                            :right (cons loc-tree right))))))))
+                 (make-loc :left (cdr left)
+                           :ppath (loc-ppath loc-path)
+                           :right (cons loc-tree right))))))))
 
 (defun lefts (loc)
   "Returns a list of the left siblings of this loc."
   (with-loc loc
     (when loc-path
-      (node-left loc-path))))
+      (loc-left loc-path))))
 
 (defun leftmost (loc)
   "Returns the loc of the leftmost sibling of the node at this loc, or self."
   (with-loc loc
     (if loc-path
-        (let ((left (node-left loc-path)))
+        (let ((left (loc-left loc-path)))
           (list (car (last left))
-                (make-node :left nil
-                           :ppath (node-ppath loc-path)
-                           :right (cons (car (butlast left)) (list loc-tree)))))
+                (make-loc :left nil
+                          :ppath (loc-ppath loc-path)
+                          :right (cons (car (butlast left)) (list loc-tree)))))
       loc)))
 
 (defun go-up (loc)
@@ -95,10 +100,10 @@ children."
 the top."
   (with-loc loc
     (when loc-path
-      (list (concatenate 'list (reverse (node-left loc-path))
+      (list (concatenate 'list (reverse (loc-left loc-path))
                          (when loc-tree
-                           (cons loc-tree (node-right loc-path))))
-            (node-ppath loc-path)))))
+                           (cons loc-tree (loc-right loc-path))))
+            (loc-ppath loc-path)))))
 
 (defun go-next (loc)
   "Moves to the next loc in the hierarchy, depth-first. When reaching the end,
@@ -151,9 +156,9 @@ moving."
   (with-loc loc
     (when loc-path
       (list loc-tree
-            (make-node :left (node-left loc-path)
-                       :ppath (node-ppath loc-path)
-                       :right (cons tree (node-right loc-path)))))))
+            (make-loc :left (loc-left loc-path)
+                      :ppath (loc-ppath loc-path)
+                      :right (cons tree (loc-right loc-path)))))))
 
 (defun insert-left (loc tree)
   "Inserts the item as the left sibling of the node at this loc, without
@@ -161,9 +166,9 @@ moving."
   (with-loc loc
     (when loc-path
       (list loc-tree
-            (make-node :left (cons tree (node-left loc-path))
-                       :ppath (node-ppath loc-path)
-                       :right (node-right loc-path))))))
+            (make-loc :left (cons tree (loc-left loc-path))
+                      :ppath (loc-ppath loc-path)
+                      :right (loc-right loc-path))))))
 
 (defun insert-down (loc tree)
   "Inserts the item as the leftmost child of the node at this loc, without
@@ -186,23 +191,23 @@ moving."
 depth-first walk."
   (with-loc loc
     (when (and loc loc-path)
-      (cond ((node-right loc-path) (replace-by-right loc-path))
-            ((node-left loc-path) (replace-by-left loc-path))))))
+      (cond ((loc-right loc-path) (replace-by-right loc-path))
+            ((loc-left loc-path) (replace-by-left loc-path))))))
 
 (defun replace-by-right (loc-path)
   "Replaces the current node at loc by the node at the right."
   (when loc-path
-    (let ((right (node-right loc-path)))
+    (let ((right (loc-right loc-path)))
       (list (car right)
-            (make-node :left (node-left loc-path)
-                       :ppath (node-ppath loc-path)
-                       :right (cdr right))))))
+            (make-loc :left (loc-left loc-path)
+                      :ppath (loc-ppath loc-path)
+                      :right (cdr right))))))
 
 (defun replace-by-left (loc-path)
   "Replaces the current node at loc by the node at the left."
   (when loc-path
-    (let ((left (node-left loc-path)))
+    (let ((left (loc-left loc-path)))
       (list (car left)
-            (make-node :left (cdr left)
-                       :ppath (node-ppath loc-path)
-                       :right (node-right loc-path))))))
+            (make-loc :left (cdr left)
+                      :ppath (loc-ppath loc-path)
+                      :right (loc-right loc-path))))))
