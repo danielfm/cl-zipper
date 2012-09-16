@@ -1,0 +1,258 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>cl-zipper by danielfm</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">cl-zipper</h1>
+        <p class="header">Common Lisp implementation of the Zipper data structure first described by Gerárd Huet.</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/danielfm/cl-zipper/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/danielfm/cl-zipper/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/danielfm/cl-zipper">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/danielfm">danielfm</a></p>
+
+
+      </header>
+      <section>
+        <h1>cl-zipper</h1>
+
+<p>cl-zipper is a Common Lisp implementation of the Zipper data structure first
+described by <a href="http://www.st.cs.uni-saarland.de/edu/seminare/2005/advanced-fp/docs/huet-zipper.pdf">Gerárd Huet</a>.</p>
+
+<h2>Supported Implementations</h2>
+
+<p>The code was tested and runs successfuly on each of the following
+Common Lisp platforms:</p>
+
+<ul>
+<li><a href="http://www.sbcl.org/">SBCL</a></li>
+<li><a href="http://www.gnu.org/software/clisp/">CLISP</a></li>
+</ul><h2>Runtime Dependencies</h2>
+
+<p>First, make sure that you have
+<a href="http://common-lisp.net/project/asdf/">ASDF</a> installed and loaded:</p>
+
+<div class="highlight"><pre><span class="nb">&gt;</span> <span class="p">(</span><span class="nv">asdf:asdf-version</span><span class="p">)</span>
+<span class="s">"2.017"</span>
+</pre></div>
+
+<p>A simple way to get ASDF is via
+<a href="http://www.quicklisp.org/beta/">QuickLisp</a>, which is a library
+manager for Common Lisp.</p>
+
+<h2>Installing cl-zipper</h2>
+
+<p>At this moment the package is not yet available for download through
+QuickLisp.</p>
+
+<p>However, it could be installed rather easily by cloning the project
+inside <code>~/quicklisp/local-projects</code> directory and running
+<code>(ql:quickload :cl-zipper)</code> in the REPL.</p>
+
+<h2>Getting Started</h2>
+
+<p>First, start a REPL and load the system:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nv">asdf:load-system</span> <span class="ss">:cl-zipper</span><span class="p">)</span>
+<span class="p">(</span><span class="nb">use-package</span> <span class="ss">:cl-zipper</span><span class="p">)</span>
+</pre></div>
+
+<p>Suppose we have the tree <code>(a + b) * (c - d)</code> to play with:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*loc*</span> <span class="p">(</span><span class="nv">zipper</span> <span class="o">'</span><span class="p">(</span><span class="nb">*</span> <span class="p">(</span><span class="nb">+</span> <span class="nv">a</span> <span class="nv">b</span><span class="p">)</span> <span class="p">(</span><span class="nb">-</span> <span class="nv">c</span> <span class="nv">d</span><span class="p">))))</span>
+</pre></div>
+
+<h3>Navigation Primitives</h3>
+
+<p>Now, let's examine the four basic zipper operations: <code>(go-down loc)</code>,
+<code>(go-right loc)</code>, <code>(go-left loc)</code>, and <code>(go-up loc)</code>.</p>
+
+<p>Every zipper operation gets what we call a <em>loc</em>, or location, which
+consists in the current focus of attention within the tree, and the
+return value is a <em>loc</em> that represents the new location after such
+operation is performed.</p>
+
+<p>For instance, let's take a look at what <code>(go-down loc)</code> does:</p>
+
+<div class="highlight"><pre><span class="nb">&gt;</span> <span class="p">(</span><span class="nb">documentation</span> <span class="ss">'go-down</span> <span class="ss">'function</span><span class="p">)</span>
+<span class="s">"Returns the loc of the leftmost child of the node at this loc, or</span>
+<span class="s">nil if no children."</span>
+</pre></div>
+
+<p>Obtaining more information about the current <em>loc</em> and its
+surroundings:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*loc-down*</span> <span class="p">(</span><span class="nv">go-down</span> <span class="vg">*loc*</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nb">car</span> <span class="vg">*loc-down*</span><span class="p">)</span>    <span class="c1">;; *</span>
+<span class="p">(</span><span class="nv">lefts</span> <span class="vg">*loc-down*</span><span class="p">)</span>  <span class="c1">;; NIL</span>
+<span class="p">(</span><span class="nv">rights</span> <span class="vg">*loc-down*</span><span class="p">)</span> <span class="c1">;; ((+ A B) (- C D))</span>
+</pre></div>
+
+<p>The nice thing about this kind of abstraction is that you can navigate
+a tree by chaining calls:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*loc-down-right*</span> <span class="p">(</span><span class="nv">go-right</span> <span class="vg">*loc-down*</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nb">car</span> <span class="vg">*loc-down-right*</span><span class="p">)</span>    <span class="c1">;; (+ A B)</span>
+<span class="p">(</span><span class="nv">lefts</span> <span class="vg">*loc-down-right*</span><span class="p">)</span>  <span class="c1">;; (*)</span>
+<span class="p">(</span><span class="nv">rights</span> <span class="vg">*loc-down-right*</span><span class="p">)</span> <span class="c1">;; ((- C D))</span>
+</pre></div>
+
+<p>By now you probably have guessed what the other basic navigation
+primitives do:</p>
+
+<div class="highlight"><pre><span class="nb">&gt;</span> <span class="p">(</span><span class="nb">documentation</span> <span class="ss">'go-left</span> <span class="ss">'function</span><span class="p">)</span>
+<span class="s">"Returns the loc of the left sibling of the node at this loc,</span>
+<span class="s">or nil."</span>
+</pre></div>
+
+<p>To zip up to the parent node of a nested <em>loc</em>:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nb">car</span> <span class="p">(</span><span class="nv">go-up</span> <span class="vg">*loc-down-right*</span><span class="p">))</span> <span class="c1">;; (* (+ A B) (- C D))</span>
+</pre></div>
+
+<h3>Navigation Shortcuts</h3>
+
+<p>Use <code>(go-next loc)</code> if you just want to visit the nodes of
+the tree in depth-first order:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*loc-next-2*</span> <span class="p">(</span><span class="nv">go-next</span> <span class="p">(</span><span class="nv">go-next</span> <span class="vg">*loc*</span><span class="p">)))</span>
+
+<span class="p">(</span><span class="nb">car</span> <span class="vg">*loc-next-2*</span><span class="p">)</span>    <span class="c1">;; (+ A B)</span>
+<span class="p">(</span><span class="nv">lefts</span> <span class="vg">*loc-next-2*</span><span class="p">)</span>  <span class="c1">;; (*)</span>
+<span class="p">(</span><span class="nv">rights</span> <span class="vg">*loc-next-2*</span><span class="p">)</span> <span class="c1">;; (- C D)</span>
+</pre></div>
+
+<p>Similarly, use <code>(go-prev loc)</code> to walk to the opposite direction:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*loc-next*</span> <span class="p">(</span><span class="nv">go-prev</span> <span class="vg">*loc-next-2*</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nb">car</span> <span class="vg">*loc-next*</span><span class="p">)</span>    <span class="c1">;; *</span>
+<span class="p">(</span><span class="nv">lefts</span> <span class="vg">*loc-next*</span><span class="p">)</span>  <span class="c1">;; NIL</span>
+<span class="p">(</span><span class="nv">rights</span> <span class="vg">*loc-next*</span><span class="p">)</span> <span class="c1">;; ((+ A B) (- C D))</span>
+</pre></div>
+
+<p>Now, suppose you have a <em>loc</em> that points to <code>A</code>:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*loc-a*</span> <span class="p">(</span><span class="nv">go-right</span> <span class="p">(</span><span class="nv">go-down</span> <span class="p">(</span><span class="nv">go-right</span> <span class="p">(</span><span class="nv">go-down</span> <span class="vg">*loc*</span><span class="p">)))))</span>
+
+<span class="p">(</span><span class="nb">car</span> <span class="vg">*loc-a*</span><span class="p">)</span>    <span class="c1">;; A</span>
+<span class="p">(</span><span class="nv">lefts</span> <span class="vg">*loc-a*</span><span class="p">)</span>  <span class="c1">;; (+)</span>
+<span class="p">(</span><span class="nv">rights</span> <span class="vg">*loc-a*</span><span class="p">)</span> <span class="c1">;; (B)</span>
+</pre></div>
+
+<p>You can get the leftmost or rightmost <em>loc</em> with a simple function
+call:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nb">car</span> <span class="p">(</span><span class="nv">leftmost</span> <span class="vg">*loc-a*</span><span class="p">))</span>  <span class="c1">;; +</span>
+<span class="p">(</span><span class="nb">car</span> <span class="p">(</span><span class="nv">rightmost</span> <span class="vg">*loc-a*</span><span class="p">))</span> <span class="c1">;; B</span>
+</pre></div>
+
+<h3>Removing Nodes</h3>
+
+<p>Just call <code>(remove-node loc)</code> to remove the node at <em>loc</em>:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nv">root-node</span> <span class="p">(</span><span class="nv">remove-node</span> <span class="vg">*loc-a*</span><span class="p">))</span> <span class="c1">;; (* (+ B) (- C D))</span>
+</pre></div>
+
+<h3>Inserting Nodes</h3>
+
+<p>The first functions we'll see are <code>(insert-left loc node)</code> and
+<code>(insert-right loc node)</code>:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nv">root-node</span> <span class="p">(</span><span class="nv">insert-left</span> <span class="vg">*loc-a*</span> <span class="ss">'x</span><span class="p">))</span>  <span class="c1">;; (* (+ X A B) (- C D))</span>
+<span class="p">(</span><span class="nv">root-node</span> <span class="p">(</span><span class="nv">insert-right</span> <span class="vg">*loc-a*</span> <span class="ss">'x</span><span class="p">))</span> <span class="c1">;; (* (+ A X B) (- C D))</span>
+</pre></div>
+
+<p>If the node at <em>loc</em> is the root of a subtree, it's possible to
+insert child nodes with <code>(append-down loc node)</code> and
+<code>(insert-down loc node)</code>.</p>
+
+<p>The <code>(append-down loc node)</code> function inserts a node as the rightmost
+child of the node at <em>loc</em>:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nb">defparameter</span> <span class="vg">*loc-subtree*</span> <span class="p">(</span><span class="nv">go-right</span> <span class="p">(</span><span class="nv">go-down</span> <span class="vg">*loc*</span><span class="p">)))</span>
+<span class="p">(</span><span class="nv">root-node</span> <span class="p">(</span><span class="nv">append-down</span> <span class="vg">*loc-subtree*</span> <span class="o">'</span><span class="p">(</span><span class="nb">/</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)))</span> <span class="c1">;; (* (+ A B (/ X Y)) (- C D))</span>
+</pre></div>
+
+<p>Use <code>(insert-down loc node)</code> to insert a node as the leftmost child:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nv">root-node</span> <span class="p">(</span><span class="nv">insert-down</span> <span class="vg">*loc-subtree*</span> <span class="o">'</span><span class="p">(</span><span class="nb">/</span> <span class="nv">x</span> <span class="nv">y</span><span class="p">)))</span> <span class="c1">;; (* ((/ X Y) + A B) (- C D))</span>
+</pre></div>
+
+<h3>Changing Nodes</h3>
+
+<p>Use <code>(change-node loc node)</code> in order to replace the node at <em>loc</em>:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nv">root-node</span> <span class="p">(</span><span class="nv">change-node</span> <span class="vg">*loc-a*</span> <span class="ss">'x</span><span class="p">))</span> <span class="c1">;; (* (+ X B) (- C D))</span>
+</pre></div>
+
+<p>If the change is modeled by a function, the function
+<code>(edit-node loc func &amp;rest args)</code> replaces the node at <em>loc</em> with the
+result of applying <code>(func (car loc) arg1 arg2 ... argN)</code>:</p>
+
+<div class="highlight"><pre><span class="p">(</span><span class="nb">defun</span> <span class="nv">crazy-fn</span> <span class="p">(</span><span class="nv">node</span> <span class="nv">n1</span> <span class="nv">n2</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">if</span> <span class="p">(</span><span class="nb">equal</span> <span class="nv">node</span> <span class="ss">'A</span><span class="p">)</span>
+    <span class="nv">n1</span>
+    <span class="nv">n2</span><span class="p">))</span>
+
+<span class="p">(</span><span class="nv">root-node</span> <span class="p">(</span><span class="nv">edit-node</span> <span class="vg">*loc-a*</span> <span class="nf">#'</span><span class="nv">crazy-fn</span> <span class="mi">1</span> <span class="mi">2</span><span class="p">))</span> <span class="c1">;; (* (+ 1 B) (- C D))</span>
+</pre></div>
+
+<h3>Zippers Are Functional</h3>
+
+<p>With zippers you can write code that looks like an imperative,
+destructive walk through a tree, call <code>(root-node loc)</code> when you are
+done and get a new tree reflecting all the changes, when in fact nothing
+at all is mutated - it's all thread safe and shareable.</p>
+
+<h2>Contributing</h2>
+
+<p>If you found bugs or want to add new features to cl-zipper, the first
+step is to write tests that cover your changes.</p>
+
+<p>As you'll see in a moment, <a href="http://www.cliki.net/FIVEAM">5am</a> testing
+framework is required in order to run the tests.</p>
+
+<p>Now, clone this repository and open Lisp REPL at its root directory:</p>
+
+<div class="highlight"><pre><span class="nb">&gt;</span> <span class="p">(</span><span class="nv">ql:quickload</span> <span class="ss">:fiveam</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="p">(</span><span class="ss">:FIVEAM</span><span class="p">)</span>
+
+<span class="nb">&gt;</span> <span class="p">(</span><span class="nv">asdf:test-system</span> <span class="ss">:cl-zipper</span><span class="p">)</span>
+<span class="o">...</span>
+<span class="no">T</span>
+</pre></div>
+
+<h2>License</h2>
+
+<p>Copyright (C) Daniel Fernandes Martins</p>
+
+<p>Distributed under the New BSD License. See COPYING for further details.</p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
