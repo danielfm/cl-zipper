@@ -6,7 +6,7 @@
 (defsystem :cl-zipper
   :description "Common Lisp implementation of Gérard Huet's Zippers."
   :version "0.1"
-  :author "Daniel Martins <daniel.tritone@gmail.com>"
+  :author "Daniel Fernandes Martins <daniel.tritone@gmail.com>"
   :license "BSD"
   :components ((:module "src"
                         :serial t

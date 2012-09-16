@@ -231,6 +231,6 @@ T
 
 ## License
 
-Copyright (C) Destaquenet Technology Solutions
+Copyright (C) Daniel Fernandes Martins
 
 Distributed under the New BSD License. See COPYING for further details.
