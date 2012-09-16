@@ -34,7 +34,7 @@ However, it could be installed rather easily by cloning the project
 inside `~/quicklisp/local-projects` directory and running
 `(ql:quickload :cl-zipper)` in the REPL.
 
-## Usage
+## Getting Started
 
 First, start a REPL and load the system:
 
@@ -158,9 +158,54 @@ while keeping any changes.
 
 ### Inserting Nodes
 
-TODO.
+The first functions we'll see are `(insert-left loc node)` and
+`(insert-right loc node)`:
+
+````common-lisp
+(root-node (insert-left *loc-a* 'x))  ;; (* (+ X A B) (- C D))
+(root-node (insert-right *loc-a* 'x)) ;; (* (+ A X B) (- C D))
+````
+
+If the node at _loc_ is the root of a subtree, it's possible to
+insert child nodes with `(append-down loc node)` and
+`(insert-down loc node)`.
+
+The `(append-down loc node)` function inserts a node as the rightmost
+child of the node at _loc_:
+
+````common-lisp
+(defparameter *loc-subtree* (go-right (go-down *loc*)))
+(root-node (append-down *loc-subtree* '(/ x y))) ;; (* (+ A B (/ X Y)) (- C D))
+````
+
+Use `(insert-down loc node)` to insert a node as the leftmost child:
+
+````common-lisp
+(root-node (insert-down *loc-subtree* '(/ x y))) ;; (* ((/ X Y) + A B) (- C D))
+````
 
 ### Changing Nodes
+
+Use `(change-node loc node)` in order to replace the node at _loc_:
+
+````common-lisp
+(root-node (change-node *loc-a* 'x)) ;; (* (+ X B) (- C D))
+````
+
+If the change is modeled by a function, the function
+`(edit-node loc func &rest args)` replaces the node at _loc_ with the
+result of applying `(func (car loc) arg1 arg2 ... argN)`:
+
+````common-lisp
+(defun crazy-fn (node n1 n2)
+  (if (equal node 'A)
+    n1
+    n2))
+
+(root-node (edit-node *loc-a* #'crazy-fn 1 2)) ;; (* (+ 1 B) (- C D))
+````
+
+## More Examples
 
 TODO.
 
