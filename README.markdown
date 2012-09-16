@@ -39,29 +39,27 @@ inside `~/quicklisp/local-projects` directory and running
 First, start a REPL and load the system:
 
 ````common-lisp
-> (asdf:load-system :cl-zipper)
-T
-
-> (use-package :cl-zipper)
-T
+(asdf:load-system :cl-zipper)
+(use-package :cl-zipper)
 ````
 
 Suppose we have the tree `(a + b) * (c - d)` to play with:
 
 ````common-lisp
-> (defparameter *loc* (zipper '(* (+ a b) (- c d))))
-*loc*
+(defparameter *loc* (zipper '(* (+ a b) (- c d))))
 ````
 
-### Basic Navigation
+### Navigation Primitives
 
-Now, let's examine the first four zipper operations: `go-down`,
-`go-right`, `go-left`, and `go-up`.
+Now, let's examine the four basic zipper operations: `(go-down loc)`,
+`(go-right loc)`, `(go-left loc)`, and `(go-up loc)`.
 
-Every zipper operation returns what we call a _loc_, or location,
-which consists in the current focus of attention within the tree.
+Every zipper operation gets what we call a _loc_, or location, which
+consists in the current focus of attention within the tree, and the
+return value is a _loc_ that represents the new location after such
+operation is performed.
 
-Taking a closer look at what `(go-down loc)` does:
+For instance, let's take a look at what `(go-down loc)` does:
 
 ````common-lisp
 > (documentation 'go-down 'function)
@@ -69,41 +67,30 @@ Taking a closer look at what `(go-down loc)` does:
 nil if no children."
 ````
 
-Obtaining more information about the current location:
+Obtaining more information about the current _loc_ and its
+surroundings:
 
 ````common-lisp
-> (defparameter *loc-down* (go-down *loc*))
-*LOC-DOWN*
+(defparameter *loc-down* (go-down *loc*))
 
-> (car *loc-down*)    ;; node at this loc
-*
-
-> (lefts *loc-down*)  ;; left siblings of the node at this loc
-NIL
-
-> (rights *loc-down*) ;; right siblings of the node at this loc
-((+ A B) (- C D))
+(car *loc-down*)    ;; *
+(lefts *loc-down*)  ;; NIL
+(rights *loc-down*) ;; ((+ A B) (- C D))
 ````
 
 The nice thing about this kind of abstraction is that you can navigate
 a tree by chaining calls:
 
 ````common-lisp
-> (defparameter *loc-down-right* (go-right *loc-down*))
-*LOC-DOWN-RIGHT*
+(defparameter *loc-down-right* (go-right *loc-down*))
 
-> (car *loc-down-right*)
-(+ A B)
-
-> (lefts *loc-down-right*)
-(*)
-
-> (rights *loc-down-right*)
-((- C D))
+(car *loc-down-right*)    ;; (+ A B)
+(lefts *loc-down-right*)  ;; (*)
+(rights *loc-down-right*) ;; ((- C D))
 ````
 
-By now you probably have guessed what `(go-left loc)` and
-`(go-right loc)` do:
+By now you probably have guessed what the other basic navigation
+primitives do:
 
 ````common-lisp
 > (documentation 'go-left 'function)
@@ -111,18 +98,69 @@ By now you probably have guessed what `(go-left loc)` and
 or nil."
 ````
 
-To zip up to the parent node of this loc:
+To zip up to the parent node of a nested _loc_:
 
 ````common-lisp
-> (car (go-up *loc-down-right*))
-(* (+ A B) (- C D))
+(car (go-up *loc-down-right*)) ;; (* (+ A B) (- C D))
 ````
 
 ### Navigation Shortcuts
 
+Use `(go-next loc)` if you just want to visit the nodes of
+the tree in depth-first order:
+
+````common-lisp
+(defparameter *loc-next-2* (go-next (go-next *loc*)))
+
+(car *loc-next-2*)    ;; (+ A B)
+(lefts *loc-next-2*)  ;; (*)
+(rights *loc-next-2*) ;; (- C D)
+````
+
+Similarly, use `(go-prev loc)` to walk to the opposite direction:
+
+````common-lisp
+(defparameter *loc-next* (go-prev *loc-next-2*))
+
+(car *loc-next*)    ;; *
+(lefts *loc-next*)  ;; NIL
+(rights *loc-next*) ;; ((+ A B) (- C D))
+````
+
+Now, suppose you have a _loc_ that points to `A`:
+
+````common-lisp
+(defparameter *loc-a* (go-right (go-down (go-right (go-down *loc*)))))
+
+(car *loc-a*)    ;; A
+(lefts *loc-a*)  ;; (+)
+(rights *loc-a*) ;; (B)
+`````
+
+You can get the leftmost or rightmost _loc_ with a simple function
+call:
+
+````common-lisp
+(car (leftmost *loc-a*))  ;; +
+(car (rightmost *loc-a*)) ;; B
+````
+
+### Removing Nodes
+
+Just call `(remove-node loc)` to remove the node at _loc_:
+
+````common-lisp
+(root-node (remove-node *loc-a*)) ;; (* (+ B) (- C D))
+````
+
+The `(root-node loc)` function zips all the way up to the root node
+while keeping any changes.
+
+### Inserting Nodes
+
 TODO.
 
-### Changes, Insertions and Deletions
+### Changing Nodes
 
 TODO.
 
