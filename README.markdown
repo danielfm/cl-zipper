@@ -153,9 +153,6 @@ Just call `(remove-node loc)` to remove the node at _loc_:
 (root-node (remove-node *loc-a*)) ;; (* (+ B) (- C D))
 ````
 
-The `(root-node loc)` function zips all the way up to the root node
-while keeping any changes.
-
 ### Inserting Nodes
 
 The first functions we'll see are `(insert-left loc node)` and
@@ -205,9 +202,12 @@ result of applying `(func (car loc) arg1 arg2 ... argN)`:
 (root-node (edit-node *loc-a* #'crazy-fn 1 2)) ;; (* (+ 1 B) (- C D))
 ````
 
-## More Examples
+### Zippers Are Functional
 
-TODO.
+With zippers you can write code that looks like an imperative,
+destructive walk through a tree, call `(root-node loc)` when you are
+done and get a new tree reflecting all the changes, when in fact nothing
+at all is mutated - it's all thread safe and shareable.
 
 ## Contributing
 
