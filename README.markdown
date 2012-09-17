@@ -8,6 +8,7 @@ described by [Gerárd Huet](http://www.st.cs.uni-saarland.de/edu/seminare/2005/a
 The code was tested and runs successfuly on each of the following
 Common Lisp platforms:
 
+* [Clozure CL](http://ccl.clozure.com/)
 * [SBCL](http://www.sbcl.org/)
 * [CLISP](http://www.gnu.org/software/clisp/)
 
