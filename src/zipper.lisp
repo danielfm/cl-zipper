@@ -21,11 +21,10 @@ loc, respectively."
 
 (defun root-node (loc)
   "Zips all the way up and returns the root node, reflecting any changes."
-  (with-loc loc
-    (let ((loc-up (go-up loc)))
-      (if loc-up
-          (root-node loc-up)
-        (car loc)))))
+  (let ((loc-up (go-up loc)))
+    (if loc-up
+        (root-node loc-up)
+        (car loc))))
 
 (defun go-down (loc)
   "Returns the loc of the leftmost child of the node at this loc, or nil if no
